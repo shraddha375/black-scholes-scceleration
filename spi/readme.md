@@ -21,12 +21,9 @@ Use these FPGA pins:
 |--------------|-------------------|------------|------------|
 | SCK          | A5                |  G17       |SPI clock   |
 | MOSI         | A6                |  J18       |ESP32 → FPGA|
-| MISO         | A7                |
- K15       |FPGA → ESP32|
-| CS           | A8                |
- L16        |Active-low  |
-| GND          | Any GND           |
- —          |Needed      |
+| MISO         | A7                |  K15       |FPGA → ESP32|
+| CS           | A8                |  L16       |Active-low  |
+| GND          | Any GND           |  —         |Needed      |
 
                                      
 
