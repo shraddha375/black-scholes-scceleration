@@ -1,5 +1,5 @@
 from machine import Pin, SPI
-import struct, time
+import time
 
 spi = SPI(1,
           baudrate=1_000_000,
@@ -12,36 +12,31 @@ spi = SPI(1,
 cs = Pin(15, Pin.OUT)
 cs.value(1)
 
-def send_param(value):
-    cs.value(0)
-    spi.write(struct.pack('>H', value))   # big endian 16-bit
-    cs.value(1)
-    time.sleep_ms(5)
+def send_black_scholes(S, K, r, sigma, T):
+    payload = bytearray([
+        0xA0,  # command
+        (S >> 8) & 0xFF, S & 0xFF,
+        (K >> 8) & 0xFF, K & 0xFF,
+        (r >> 8) & 0xFF, r & 0xFF,
+        (sigma >> 8) & 0xFF, sigma & 0xFF,
+        (T >> 8) & 0xFF, T & 0xFF
+    ])
 
-def read_result():
     cs.value(0)
-    result = spi.read(2)  # read 2 bytes
+    spi.write(payload)
     cs.value(1)
-    return struct.unpack('>H', result)[0]
+    time.sleep(0.01)
 
-# Example values
-S     = 1000
-K     = 800
-r     = 50
-sigma = 20
-T     = 1000
+    # Now read output
+    cs.value(0)
+    result = spi.read(2)  # two bytes
+    cs.value(1)
+
+    price = (result[0] << 8) | result[1]
+    print("Call Price:", price)
+    return price
+
 
 while True:
-    print("Sending parameters...")
-    send_param(S)
-    send_param(K)
-    send_param(r)
-    send_param(sigma)
-    send_param(T)
-
-    time.sleep(0.5)
-
-    cp = read_result()
-    print("Call price =", cp)
-
-    time.sleep(1)
+    send_black_scholes(100, 100, 5, 20, 1)
+    time.sleep(2)
